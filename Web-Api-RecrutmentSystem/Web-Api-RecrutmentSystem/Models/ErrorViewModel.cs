@@ -1,6 +1,6 @@
 using System;
 
-namespace Web_Api_RecrutmentSystem.Models
+namespace RecrutmentSystem.Models
 {
     public class ErrorViewModel
     {

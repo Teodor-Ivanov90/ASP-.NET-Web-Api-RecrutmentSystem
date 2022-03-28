@@ -1,34 +1,45 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using RecrutmentSystem.Data;
+using RecrutmentSystem.Infrastructures;
+using RecrutmentSystem.Services.Candidates;
+using RecrutmentSystem.Services.Interviews;
+using RecrutmentSystem.Services.Jobs;
+using RecrutmentSystem.Services.Recruiters;
+using RecrutmentSystem.Services.Skills;
 
-namespace Web_Api_RecrutmentSystem
+namespace RecrutmentSystem
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) 
+            => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            
+            services.AddDbContext<RecrutmentSystemDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddTransient<IRecruitersService, RecruitersService>();
+            services.AddTransient<ICandidatesService, CandidatesService>();
+            services.AddTransient<ISkillsService, SkillsService>();
+            services.AddTransient<IJobsService, JobsService>();
+            services.AddTransient<IInterviewsService, InterviewsService>();
+            
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.PrepareDatabase();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -36,15 +47,17 @@ namespace Web_Api_RecrutmentSystem
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseAuthorization();
+
+            
 
             app.UseEndpoints(endpoints =>
             {
