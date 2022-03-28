@@ -72,16 +72,13 @@ namespace RecrutmentSystem.Controllers
                 return BadRequest();
             }
 
-            //var existingCandidate = this.data.Candidates.FirstOrDefault(c => c.Id == id);
-            var interview = this.interviews.GetByCandidateID(id);
-            if (interview != null)
+            var interviews = this.interviews.GetByCandidateID(id);
+            if (interviews != null)
             {
-                this.interviews.Delete(interview.Select(i => i.Id).ToList());
-                this.data.SaveChanges();
+                this.interviews.Delete(interviews.Select(i => i.Id).ToList());
             }
             
             this.candidates.Delete(id);
-            this.data.SaveChanges();
 
             return Ok();
         }
@@ -97,11 +94,13 @@ namespace RecrutmentSystem.Controllers
                 return BadRequest();
             }
 
+            var candidateFromDb = this.candidates.AlreadyExist(candidateExist);
+
             var recruiter = this.recruiters.AlreadyExist(candidate);
 
-            var skills = this.candidates.Skills(candidate);
+            var skills = this.candidates.ChangeSkills(candidate);
 
-            this.candidates.SaveToDb(candidate, recruiter, skills);
+            this.candidates.ChangeInDb(candidateFromDb,candidate, recruiter, skills);
 
             return Ok();
         }

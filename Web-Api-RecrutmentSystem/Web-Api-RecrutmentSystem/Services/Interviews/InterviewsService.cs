@@ -45,6 +45,7 @@ namespace RecrutmentSystem.Services.Interviews
                  .ToList();
 
             this.data.Interviews.RemoveRange(interview);
+            this.data.SaveChanges();
         }
 
         public ICollection<Interview> GetByCandidateID(int id)

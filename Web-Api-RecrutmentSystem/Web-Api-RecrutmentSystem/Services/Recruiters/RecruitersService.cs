@@ -21,9 +21,7 @@ namespace RecrutmentSystem.Services.Recruiters
         {
             var recruiter = this.data
                .Recruiters
-               .Where(r => r.LastName == candidate.Recruiter.LastName
-                   && r.Email == candidate.Recruiter.Email
-                   && r.Country == candidate.Recruiter.Country)
+               .Where(r => r.Email == candidate.Recruiter.Email)
                .FirstOrDefault();
 
             if (recruiter != null)

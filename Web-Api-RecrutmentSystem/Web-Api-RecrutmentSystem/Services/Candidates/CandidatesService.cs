@@ -1,4 +1,5 @@
-﻿using RecrutmentSystem.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using RecrutmentSystem.Data;
 using RecrutmentSystem.Data.Models;
 using RecrutmentSystem.Models.Candidates;
 using System.Collections.Generic;
@@ -52,26 +53,29 @@ namespace RecrutmentSystem.Services.Candidates
                 })
                 .FirstOrDefault();
 
+        public void ChangeInDb(Candidate candidateFromDb ,CandidateRequestModel candidate, Recruiter recruiter, ICollection<Skill> skills)
+        {
+
+            candidateFromDb.FirstName = candidate.FirstName;
+            candidateFromDb.LastName = candidate.LastName;
+            candidateFromDb.Email = candidate.Email;
+            candidateFromDb.Bio = candidate.Bio;
+            candidateFromDb.BirthDate = candidate.BirthDate;
+            candidateFromDb.Skills = skills;
+            candidateFromDb.Recruiter = recruiter;
+
+            this.data.SaveChanges();
+        }
+
         public void SaveToDb(CandidateRequestModel candidate, Recruiter recruiter, ICollection<Skill> skills)
         {
-            var candidateToDb = new Candidate
-            {
-                FirstName = candidate.FirstName,
-                LastName = candidate.LastName,
-                Email = candidate.Email,
-                Bio = candidate.Bio,
-                BirthDate = candidate.BirthDate,
-                Skills = skills,
-                Recruiter = recruiter
-            };
-
-            this.data.Candidates.Add(candidateToDb);
-            this.data.SaveChanges();
+           
         }
 
         public Candidate AlreadyExist(CandidateRequestModel candidate)
             => this.data
             .Candidates
+            .Include(c => c.Skills)
             .FirstOrDefault(c => c.Email == candidate.Email);
 
         
@@ -99,6 +103,35 @@ namespace RecrutmentSystem.Services.Candidates
             return skills;
         }
 
+
+        public ICollection<Skill> ChangeSkills(CandidateRequestModel candidate)
+        {
+            var skills = new List<Skill>();
+
+            var candidateFromDB = this.AlreadyExist(candidate);
+            candidateFromDB.Skills.Clear();
+
+            foreach (var skill in candidate.Skills)
+            {
+                var isSkillInDb = this.data
+                    .Skills.Any(s => s.Name == skill.Name);
+
+                if (!isSkillInDb)
+                {
+                    var skillToDb = new Skill { Name = skill.Name };
+                    skills.Add(skillToDb);
+                }
+                else
+                {
+                    var skillFromDb = this.data.Skills.FirstOrDefault(s => s.Name == skill.Name);
+
+                    skills.Add(skillFromDb);
+                }
+            }
+
+            return skills;
+        }
+
         public void Delete(int id)
         {
            var candidate = this.data.Candidates.Where(c => c.Id == id).FirstOrDefault();
@@ -106,6 +139,9 @@ namespace RecrutmentSystem.Services.Candidates
             {
                 this.data.Candidates.Remove(candidate);
             }
+
+            this.data.SaveChanges();
         }
+
     }
 }
