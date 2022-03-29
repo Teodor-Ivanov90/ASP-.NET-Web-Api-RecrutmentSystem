@@ -1,6 +1,7 @@
 ﻿using RecrutmentSystem.Data;
 using RecrutmentSystem.Data.Models;
 using RecrutmentSystem.Models.Candidates;
+using RecrutmentSystem.Models.Recruiters;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,12 +18,15 @@ namespace RecrutmentSystem.Services.Recruiters
             => this.data.Recruiters
                 .FirstOrDefault(r => r.Id == id);
 
-        public Recruiter AlreadyExist(CandidateRequestModel candidate)
-        {
-            var recruiter = this.data
+        public Recruiter GetByEmail(string email)
+            => this.data
                .Recruiters
-               .Where(r => r.Email == candidate.Recruiter.Email)
+               .Where(r => r.Email == email)
                .FirstOrDefault();
+
+        public Recruiter Create(CandidateModel candidate)
+        {
+            var recruiter = this.GetByEmail(candidate.Email);
 
             if (recruiter != null)
             {
@@ -40,11 +44,34 @@ namespace RecrutmentSystem.Services.Recruiters
 
             return recruiter;
         }
+        public Recruiter Change(CandidateModel candidate)
+        {
+            var recruiter = this.GetByEmail(candidate.Recruiter.Email);
 
-        public ICollection<RecruiterRequestModel> RecruiterByExperience(int level)
+            if (recruiter != null)
+            {
+                recruiter.LastName = candidate.Recruiter.LastName ;
+                recruiter.Country = candidate.Recruiter.Country;
+
+                this.data.SaveChanges();
+            }
+            else
+            {
+                recruiter = new Recruiter
+                {
+                    LastName = candidate.Recruiter.LastName,
+                    Email = candidate.Recruiter.Email,
+                    Country = candidate.Recruiter.Country
+                };
+            }
+
+            return recruiter;
+        }
+
+        public ICollection<RecruiterModel> RecruiterByExperience(int level)
             => this.data.Recruiters
                 .Where(r => r.Experience == level)
-                .Select(r => new RecruiterRequestModel
+                .Select(r => new RecruiterModel
                 {
                     LastName = r.LastName,
                     Country = r.Country,
@@ -52,16 +79,16 @@ namespace RecrutmentSystem.Services.Recruiters
                 })
                 .ToList();
 
-        public ICollection<RecruiterRequestModel> RecruitersWithAvailableCandidats()
+        public ICollection<RecruiterModel> WithAvailableCandidats()
             => this.data.Recruiters
                 .Where(r => r.Candidates.Any())
-                .Select(r => new RecruiterRequestModel
+                .Select(r => new RecruiterModel
                 {
                     LastName = r.LastName,
                     Country = r.Country,
                     Email = r.Email
                 })
                 .ToList();
-        
+
     }
 }

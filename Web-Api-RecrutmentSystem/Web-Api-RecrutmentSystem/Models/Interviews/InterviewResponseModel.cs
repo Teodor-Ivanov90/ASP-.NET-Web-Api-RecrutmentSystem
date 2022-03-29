@@ -1,14 +1,13 @@
 ﻿using RecrutmentSystem.Models.Candidates;
 using RecrutmentSystem.Models.Jobs;
+using Web_Api_RecrutmentSystem.Models.Candidates;
 
 namespace RecrutmentSystem.Models.Interviews
 {
     public class InterviewResponseModel
     {
-        public int Id { get; set; }
+        public JobModel Job { get; set; }
 
-        public JobRequestModel Job { get; set; }
-
-        public CandidateRequestModel Candidate { get; set; }
+        public CandidateResponseModel Candidate { get; set; }
     }
 }

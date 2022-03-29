@@ -1,6 +1,6 @@
-﻿namespace RecrutmentSystem.Models.Candidates
+﻿namespace RecrutmentSystem.Models.Recruiters
 {
-    public class RecruiterRequestModel
+    public class RecruiterModel
     {
         public string LastName { get; set; }
         public string Email { get; set; }

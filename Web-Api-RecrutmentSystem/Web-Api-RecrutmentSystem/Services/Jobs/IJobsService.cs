@@ -6,12 +6,17 @@ namespace RecrutmentSystem.Services.Jobs
 {
     public interface IJobsService
     {
-        ICollection<JobRequestModel> GetJobsBySkill(string skill);
+        ICollection<JobModel> GetJobsBySkill(string skill);
 
-        ICollection<Skill> Skills(JobRequestModel job);
+        ICollection<Skill> PrepareSkills(JobModel job);
 
-        bool AlreadyExist(JobRequestModel job);
+        bool AlreadyExist(JobModel job);
+        bool AlreadyExist(int id);
 
-        Job AddToDb(JobRequestModel job, ICollection<Skill> skills);
+        void AddToDb(JobModel job, ICollection<Skill> skills);
+        Job GetFromDB(JobModel job);
+        Job GetByID(int id);
+
+        void Delete(int id);
     }
 }

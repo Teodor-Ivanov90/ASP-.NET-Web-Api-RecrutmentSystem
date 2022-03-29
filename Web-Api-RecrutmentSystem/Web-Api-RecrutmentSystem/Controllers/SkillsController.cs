@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using RecrutmentSystem.Models.Candidates;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using RecrutmentSystem.Models.Skills;
 using RecrutmentSystem.Services.Skills;
-using System.Collections.Generic;
 
 namespace RecrutmentSystem.Controllers
 {
     [ApiController]
-    [Route("/[controller]")]
     public class SkillsController : ControllerBase
     {
         private readonly ISkillsService skills;
@@ -15,19 +14,15 @@ namespace RecrutmentSystem.Controllers
             => this.skills = skills;
 
         [HttpGet]
-        public ICollection<SkillRequestModel> Get(int id)
+        [Route("/[controller]")]
+        public SkillModel Get(int id)
         {
-            if (id != 0)
-            {
-                return  new[] { this.skills.GetById(id) };
-            }
-
-            return this.skills.Get();
+            return this.skills.GetById(id);
         } 
 
         [HttpGet]
         [Route("/[controller]/active")]
-        public ICollection<SkillRequestModel> GetActiveSkills() 
+        public ICollection<SkillModel> GetActiveSkills() 
             => this.skills.GetActive();
     }
 }

@@ -1,41 +1,40 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using RecrutmentSystem.Data.Models;
+﻿using System.Linq;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using RecrutmentSystem.Models.Jobs;
 using RecrutmentSystem.Services.Interviews;
 using RecrutmentSystem.Services.Jobs;
-using RecrutmentSystem.Services.Recruiters;
-using System.Collections.Generic;
+
 
 namespace RecrutmentSystem.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
     public class JobsController : ControllerBase
     {
         private readonly IJobsService jobs;
         private readonly IInterviewsService interviews;
-        private readonly IRecruitersService recruiters;
 
         public JobsController(IJobsService jobs,
-            IInterviewsService interviews,
-            IRecruitersService recruiters)
+            IInterviewsService interviews)
         {
             this.jobs = jobs;
             this.interviews = interviews;
-            this.recruiters = recruiters;
         } 
 
         [HttpPost]
-        public IActionResult PostJob(JobRequestModel job)
+        [Route("[controller]")]
+        public IActionResult Post(JobModel job)
         {
             if (this.jobs.AlreadyExist(job))
             {
                 return BadRequest();
             }
 
-            var skills = this.jobs.Skills(job);
+            var skills = this.jobs.PrepareSkills(job);
 
-             var jobFromDb =this.jobs.AddToDb(job, skills);
+            this.jobs.AddToDb(job, skills);
+
+            var jobFromDb = this.jobs.GetFromDB(job);
 
             var candidates = this.interviews.GetSuitableCandidates(skills);
 
@@ -45,7 +44,31 @@ namespace RecrutmentSystem.Controllers
         }
 
         [HttpGet]
-        public ICollection<JobRequestModel> GetJobsBySkill(string skill)
+        [Route("[controller]")]
+        public ICollection<JobModel> GetBySkill(string skill)
             => this.jobs.GetJobsBySkill(skill);
+
+        [HttpDelete]
+        [Route("[controller]")]
+        public ActionResult<ICollection<JobModel>> Delete(int id)
+        {
+            if (!this.jobs.AlreadyExist(id))
+            {
+                return BadRequest();
+            }
+
+            var job = this.jobs.GetByID(id);
+
+            var interviews = this.interviews.GetByJobID(id);
+
+            if(interviews != null)
+            {
+                this.interviews.Delete(interviews.Select(i => i.Id).ToList());
+            }
+
+            this.jobs.Delete(id);
+
+            return Ok();
+        }
     }
 }

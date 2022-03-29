@@ -1,5 +1,6 @@
 ﻿using RecrutmentSystem.Data.Models;
 using RecrutmentSystem.Models.Candidates;
+using RecrutmentSystem.Models.Recruiters;
 using System.Collections.Generic;
 
 namespace RecrutmentSystem.Services.Recruiters
@@ -7,8 +8,10 @@ namespace RecrutmentSystem.Services.Recruiters
     public interface IRecruitersService
     {
         Recruiter GetById(int id);
-        Recruiter AlreadyExist(CandidateRequestModel candidate);
-        ICollection<RecruiterRequestModel> RecruitersWithAvailableCandidats();
-        ICollection<RecruiterRequestModel> RecruiterByExperience(int level);
+        Recruiter GetByEmail(string email);
+        Recruiter Create(CandidateModel candidate);
+        Recruiter Change(CandidateModel candidate);
+        ICollection<RecruiterModel> WithAvailableCandidats();
+        ICollection<RecruiterModel> RecruiterByExperience(int level);
     }
 }

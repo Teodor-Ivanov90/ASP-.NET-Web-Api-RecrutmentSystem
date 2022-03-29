@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using RecrutmentSystem.Data;
+﻿using RecrutmentSystem.Data;
 using RecrutmentSystem.Data.Models;
-using RecrutmentSystem.Models.Candidates;
 using RecrutmentSystem.Models.Jobs;
+using RecrutmentSystem.Models.Skills;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,19 +14,19 @@ namespace RecrutmentSystem.Services.Jobs
         public JobsService(RecrutmentSystemDbContext data)
             => this.data = data;
 
-        public ICollection<JobRequestModel> GetJobsBySkill(string skillName)
+        public ICollection<JobModel> GetJobsBySkill(string skillName)
             => this.data.Jobs
                 .Where(j => j.Skills.Any(s => s.Name == skillName))
-                .Select(j => new JobRequestModel { 
+                .Select(j => new JobModel { 
                 Title = j.Title,
                 Description = j.Description,
                 Salary = j.Salary,
-                Skills = j.Skills.Select(s => new SkillRequestModel { Name = s.Name}).ToList()
+                Skills = j.Skills.Select(s => new SkillModel { Name = s.Name}).ToList()
                 })
                 .ToList();
         
 
-        public Job AddToDb(JobRequestModel job, ICollection<Skill> skills)
+        public void AddToDb(JobModel job, ICollection<Skill> skills)
         {
             var JobToDb = new Job
             {
@@ -40,14 +39,13 @@ namespace RecrutmentSystem.Services.Jobs
             this.data.Jobs.Add(JobToDb);
             this.data.SaveChanges();
 
-            return JobToDb;
         }
 
-        public bool AlreadyExist(JobRequestModel job)
+        public bool AlreadyExist(JobModel job)
             => this.data.Jobs
             .Any(j => j.Title == job.Title);
 
-        public ICollection<Skill> Skills(JobRequestModel job)
+        public ICollection<Skill> PrepareSkills(JobModel job)
         {
             var skills = new List<Skill>();
 
@@ -69,6 +67,29 @@ namespace RecrutmentSystem.Services.Jobs
             }
 
             return skills;
+        }
+
+        public Job GetFromDB(JobModel job)
+            => this.data.Jobs
+            .FirstOrDefault(j => j.Title == job.Title);
+
+        public Job GetByID(int id)
+            => this.data.Jobs
+            .FirstOrDefault(j => j.Id == id);
+
+        public bool AlreadyExist(int id)
+        => this.data.Jobs
+            .Any(j => j.Id == id);
+
+        public void Delete(int id)
+        {
+            var job = this.data.Jobs.Where(j => j.Id == id).FirstOrDefault();
+            if (job != null)
+            {
+                this.data.Jobs.Remove(job);
+            }
+
+            this.data.SaveChanges();
         }
     }
 }

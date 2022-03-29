@@ -6,14 +6,15 @@ namespace RecrutmentSystem.Services.Candidates
 {
     public interface ICandidatesService
     {
-        CandidateRequestModel GetById(int id);
+        CandidateModel GetById(int id);
+        Candidate GetFromDB(int id);
         void Delete(int id);
+        ICollection<CandidateModel> Get();
+        void SaveToDb(CandidateModel candidate,Recruiter recruiter, ICollection<Skill> skills);
+        void ChangeInDb(Candidate candidateFromDb, CandidateModel candidate, Recruiter recruiter, ICollection<Skill> skills);
+        bool AlreadyExist(CandidateModel candidate);
 
-        ICollection<CandidateRequestModel> Get();
-        void SaveToDb(CandidateRequestModel candidate,Recruiter recruiter, ICollection<Skill> skills);
-        void ChangeInDb(Candidate candidateFromDb, CandidateRequestModel candidate, Recruiter recruiter, ICollection<Skill> skills);
-        Candidate AlreadyExist(CandidateRequestModel candidate);
-        ICollection<Skill> Skills(CandidateRequestModel candidate);
-        ICollection<Skill> ChangeSkills(CandidateRequestModel candidate);
+        
+        ICollection<Skill> ChangeSkills(CandidateModel candidate, int candidateID);
     }
 }
